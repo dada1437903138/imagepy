@@ -1,5 +1,5 @@
 import numpy as np
-from imagepy.core.engine import Free
+from sciapp.action import Free
 from sciapp.action import ImageTool
 from scipy.ndimage import label
 from scipy.signal import convolve2d
@@ -40,7 +40,7 @@ class Painter(ImageTool):
             for i in range(len(ips.imgs)):
                 ips.imgs[i][:] = generate(img, self.size)
                 img = run(img)
-            IPy.alert('Complete!')
+            self.app.alert('Complete!')
 
 class Plugin(Free):
     title = 'Game Of Life'
@@ -56,5 +56,5 @@ class Plugin(Free):
         first = generate(np.zeros((para['height'], para['width'])), para['size'])
         imgs = [first.copy() for i in range(para['slice'])]
         ips = Image(imgs, para['name'])
-        ips.tool = Painter(para['size'])
+        ips.tool = Painter(para['size']).start(self.app, 'local')
         self.app.show_img(ips)

@@ -5,12 +5,11 @@ Created on Mon Jan 16 21:13:16 2017
 @author: yxl
 """
 
-from imagepy.core.engine import Free
+from sciapp.action import Free
 import wx,os
 from imagepy import root_dir
-from imagepy.core.app import loader
+from imagepy.app import loader, ConfigManager, DocumentManager
 from wx.py.editor import EditorFrame
-from sciapp import Source
 #from imagepy.ui.mkdownwindow import HtmlPanel, md2html
 from sciwx.text import MDPad
 from glob import glob
@@ -18,11 +17,11 @@ from glob import glob
 class Plugin ( wx.Panel ):
     title = 'Tool Tree View'
     single = None
-    def __init__( self, parent ):
+    def __init__( self, parent, app=None):
         wx.Frame.__init__ ( self, parent, id = wx.ID_ANY, 
                             pos = wx.DefaultPosition, size = wx.Size( 500,300 ), 
                             style = wx.DEFAULT_FRAME_STYLE|wx.TAB_TRAVERSAL )
-        self.app = parent
+        self.app = app
         bSizer1 = wx.BoxSizer( wx.HORIZONTAL )
         
         self.tre_plugins = wx.TreeCtrl( self, wx.ID_ANY, wx.DefaultPosition, 
@@ -33,7 +32,7 @@ class Plugin ( wx.Panel ):
         bSizer3 = wx.BoxSizer( wx.VERTICAL )
         bSizer4 = wx.BoxSizer( wx.HORIZONTAL )
         
-        self.m_staticText2 = wx.StaticText( self, wx.ID_ANY, "Tool Infomation:", 
+        self.m_staticText2 = wx.StaticText( self, wx.ID_ANY, "Tool Information", 
                                             wx.DefaultPosition, wx.DefaultSize, 0 )
         self.m_staticText2.Wrap( -1 )
         bSizer4.Add( self.m_staticText2, 0, wx.ALL, 5 )
@@ -100,7 +99,10 @@ class Plugin ( wx.Panel ):
         if plg!=None:
             self.plg = plg
             name = self.tre_plugins.GetItemText(event.GetItem())
-            self.txt_info.set_cont(Source.manager('document').get(name))
+            lang = ConfigManager.get('language')
+            doc = DocumentManager.get(name, tag=lang)
+            doc = doc or DocumentManager.get(name, tag='English')
+            self.txt_info.set_cont(doc or 'No Document!')
     
     def on_source(self, event):
         ## TODO: should it be absolute path ?

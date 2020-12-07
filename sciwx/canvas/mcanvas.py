@@ -19,9 +19,12 @@ class ICanvas(Canvas):
         isarr = isinstance(img, ndarray)
         if b and not isarr: self.images[0].back = img
         if not b and not isarr: self.images[0] = img
-        if b and isarr: self.images[0].back.img = img
+        if b and isarr: self.images[0].back = Image([img])
         if not b and isarr: self.images[0].img = img
-        [self.images[0], self.images[0].back][b].reset()
+        if not b: self.images[0].reset()
+        if b and self.images[0].back: 
+            self.images[0].back.reset()
+        self.update_box()
         self.update()
 
     def set_log(self, log, b=False):
@@ -48,6 +51,9 @@ class ICanvas(Canvas):
 
     @property
     def image(self): return self.images[0]
+
+    @property
+    def name(self): return self.image.title
 
     @property
     def back(self): return self.images[0].back
@@ -81,6 +87,7 @@ class ICanvas(Canvas):
                 self.marks['mark'] = self.image.mark.body[self.image.cur]
             elif 'mark' in self.marks: del self.marks['mark']
         else: self.marks['mark'] = self.image.mark
+        self.tool = self.image.tool
         Canvas.on_idle(self, event)
 
 class VCanvas(Canvas):

@@ -53,29 +53,29 @@ def write(path, img):
 ```
 ### register reader and writer to the io manager
 ```python 
-from imagepy.core.util import fileio
+from sciapp.action import dataio
 
 # add dicom reader and writer
-fileio.add_reader(['dcm'], read)
-fileio.add_writer(['dcm'], write)
+dataio.add_reader(['dcm'], read)
+dataio.add_writer(['dcm'], write)
 
-class OpenDCM(fileio.Reader):
+class OpenDCM(dataio.Reader):
     title = 'DICOM Open'
     filt = ['DCM']
 
-class SaveDCM(fileio.Writer):
+class SaveDCM(dataio.Writer):
     title = 'DICOM Save'
     filt = ['DCM']
     
 # add nii reader and writer, because nii is a sequence, so ruse read all, and give as a tuple.
-fileio.add_reader(['nii'], (readall,))
-fileio.add_writer(['nii'], (write,))
+dataio.add_reader(['nii'], (readall,))
+dataio.add_writer(['nii'], (write,))
 
-class OpenNII(fileio.Reader):
+class OpenNII(dataio.Reader):
 	title = 'NII Open'
 	filt = ['NII']
 
-class SaveNII(fileio.Reader):
+class SaveNII(dataio.Reader):
 	title = 'NII Save'
 	filt = ['NII']
 
@@ -87,7 +87,7 @@ Do a simple filter
 ![gradient](http://idoc.imagepy.org/itk/gradient.png)
 ```python
 import SimpleITK as sitk
-from imagepy.core.engine import Filter
+from sciapp.action import Filter
 
 class Plugin(Filter):
     title = 'ITK Gradient Magnitude'
@@ -122,7 +122,7 @@ Filter with parameter
 ```python
 # -*- coding: utf-8 -*
 import SimpleITK as sitk
-from imagepy.core.engine import Filter
+from sciapp.action import Filter
 
 class Plugin(Filter):
     title = 'ITK Discrete Gaussian'
@@ -147,7 +147,7 @@ Write 3D Filter
 ![gaussian3d](http://idoc.imagepy.org/itk/gaussian3d.png)
 ```python
 import SimpleITK as sitk
-from imagepy.core.engine import  Simple
+from sciapp.action import  Simple
 
 class Plugin(Simple):
     title = 'ITK Gradient Magnitude 3D'
@@ -167,7 +167,7 @@ Treat ROI and ColorImage
 ![roicolor](http://idoc.imagepy.org/itk/roicolor.png)
 ```python
 import SimpleITK as sitk
-from imagepy.core.engine import Filter, Simple
+from sciapp.action import Filter, Simple
 import numpy as np
 
 class Plugin(Filter):
@@ -190,7 +190,7 @@ Watershed With ROI
 ![roiwatershed](http://idoc.imagepy.org/itk/roiwatershed.png)
 ```python
 import SimpleITK as sitk
-from imagepy.core.engine import Filter, Simple
+from sciapp.action import Filter, Simple
 import numpy as np
 
 class Plugin(Filter):

@@ -1,8 +1,7 @@
-# -*- coding: utf-8 -*-
 import wx, os
-from imagepy.core.engine import Free
-from sciapp import Source
+from sciapp.action import Free
 from imagepy import root_dir
+from imagepy.app import ShortcutManager
 
 class VirtualListCtrl(wx.ListCtrl):
     def __init__(self, parent, title, data=[]):
@@ -28,14 +27,14 @@ class VirtualListCtrl(wx.ListCtrl):
         self.SetItemCount(len(self.data))
         
 class Plugin( wx.Panel ):
-    title = 'Shotcut Editor'
+    title = 'Shortcut Editor'
     single = None
 
-    def __init__( self, parent):
+    def __init__( self, parent, app=None):
         wx.Frame.__init__ ( self, parent, id = wx.ID_ANY,
                             pos = wx.DefaultPosition, size = wx.Size( 500,300 ), 
                             style = wx.DEFAULT_FRAME_STYLE|wx.TAB_TRAVERSAL )
-        self.app = parent
+        self.app = app
         bSizer1 = wx.BoxSizer( wx.VERTICAL )
         bSizer2 = wx.BoxSizer( wx.HORIZONTAL )
         self.m_staticText1 = wx.StaticText( self, wx.ID_ANY, "Search:", 
@@ -46,7 +45,7 @@ class Plugin( wx.Panel ):
                                        wx.DefaultPosition, wx.DefaultSize, 0 )
         bSizer2.Add( self.txt_search, 1, wx.ALL, 5 )
         bSizer1.Add( bSizer2, 0, wx.EXPAND, 5 )
-        self.lst_plgs = VirtualListCtrl( self, ['Name', 'Shotcut'])
+        self.lst_plgs = VirtualListCtrl( self, ['Name', 'Shortcut'])
         self.lst_plgs.SetColumnWidth(0,200)
         self.lst_plgs.SetColumnWidth(1,200)
         bSizer1.Add( self.lst_plgs, 1, wx.ALL|wx.EXPAND, 5 )
@@ -64,8 +63,8 @@ class Plugin( wx.Panel ):
     
     #def list_plg(self, lst, items
     def load(self):
-        lst = Source.manager('plugin').names()
-        self.plgs = [[i, Source.manager('shotcut').get(item='shotcut', name=i)] for i in lst]
+        lst = self.app.plugin_names()
+        self.plgs = [[i, ShortcutManager.get(i)] for i in lst]
         for i in self.plgs:
             if i[1]==None:i[1]=''
         self.plgs.sort()
@@ -100,8 +99,7 @@ class Plugin( wx.Panel ):
         code = event.GetKeyCode()
         title = self.buf[event.GetIndex()][0]
         txt = self.buf[event.GetIndex()][1]
-        if code == wx.WXK_DELETE:
-            txt = ''
+        if code == wx.WXK_DELETE: txt = ''
         elif code == wx.WXK_CONTROL: 
             txt = self.ist(txt, 'Ctrl')
         elif code == wx.WXK_ALT: 
@@ -116,9 +114,8 @@ class Plugin( wx.Panel ):
         if len(txt)>0 and txt[-1]=='-':txt=txt[:-1]
         self.buf[event.GetIndex()][1] = txt
         self.lst_plgs.RefreshItem(event.GetIndex())
-        Source.manager('shotcut').remove(name=title)
-        if txt!='': Source.manager('shotcut').add(title, txt)
+        if txt!='': ShortcutManager.add(title, txt)
         #PluginsManager.plgs[self.buf[event.GetIndex()][0]]().start()
         
     def close(self):
-        Source.manager('shotcut').write(os.path.join(root_dir,'data/shotcut.cfg'))
+        ShortcutManager.write(os.path.join(root_dir,'data/shortcut.json'))

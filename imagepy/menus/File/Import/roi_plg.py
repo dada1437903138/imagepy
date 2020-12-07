@@ -5,7 +5,7 @@ Created on 12/21/2018
 """
 import numpy as np
 import read_roi
-from imagepy.core.engine import Free
+from sciapp.action import Free
 from skimage.draw import polygon, ellipse
 
 class Plugin(Free):
@@ -19,8 +19,8 @@ class Plugin(Free):
             (int, 'height', (1, 3000), 0,  'height', 'pix')]
 
     def load(self):
-        filt = ['zip']
-        self.para['path'] = self.app.getpath(self.title, filt, 'open', self.para['name'])
+        filt = 'zip'
+        self.para['path'] = self.app.get_path(self.title, filt, 'open', self.para['name'])
         return not self.para['path'] is None
 
     def run(self, para=None):

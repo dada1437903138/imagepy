@@ -2,15 +2,18 @@ import wx, os, sys
 import time, threading
 sys.path.append('../../')
 import wx.lib.agw.aui as aui
-from sciwx.widgets import MenuBar, ToolBar
+from sciwx.widgets import MenuBar, ToolBar, RibbonBar, ParaDialog
 from sciwx.canvas import CanvasNoteBook
+from sciwx.grid import GridNoteBook
 from sciwx.widgets import ProgressBar
-from sciwx.grid import GridFrame
 from sciwx.mesh import Canvas3DFrame
 from sciwx.text import MDFrame, TextFrame
 from sciwx.plot import PlotFrame
+from sciapp.object import Image, Table
 from sciapp import App, Source
 
+from sciapp.action.plugin.filters import Gaussian
+from sciapp.action.plugin.generalio import OpenFile, SaveImage
 
 class MiniApp(wx.Frame, App):
     def __init__( self, parent ):
@@ -18,24 +21,22 @@ class MiniApp(wx.Frame, App):
                             size = wx.Size(800,600), pos = wx.DefaultPosition, 
                             style = wx.RESIZE_BORDER|wx.DEFAULT_FRAME_STYLE|wx.TAB_TRAVERSAL )
         App.__init__(self)
-        self.SetSizeHints( wx.Size(600,-1) )
+        self.auimgr = aui.AuiManager()
+        self.auimgr.SetManagedWindow( self )
+        self.SetSizeHints( wx.Size(800, 600) )
 
         self.init_menu()
-        sizer = wx.BoxSizer()
-        self.canvasnb = CanvasNoteBook(self)
-        self.canvasnb.Bind( wx.lib.agw.aui.EVT_AUINOTEBOOK_PAGE_CHANGED, self.on_new_img)
-        self.canvasnb.Bind( wx.lib.agw.aui.EVT_AUINOTEBOOK_PAGE_CLOSE, self.on_close_img)
-        sizer.Add(self.canvasnb, 1, wx.EXPAND |wx.ALL, 0)
+        self.init_canvas()
+        self.init_table()
+        self.init_status()
 
-        self.toolbar = ToolBar(self, False)
-        self.toolbar.Fit()
-        sizer.Add(self.toolbar, 0, wx.EXPAND |wx.ALL, 0)
-
-        self.SetSizer(sizer)
         self.Layout()
+        self.auimgr.Update()
+        self.Fit()
         self.Centre( wx.BOTH )
 
         self.Bind(wx.EVT_CLOSE, self.on_close)
+        self.Bind(aui.EVT_AUI_PANE_CLOSE, self.on_pan_close)
 
     def init_status(self):
         self.stapanel = stapanel = wx.Panel( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
@@ -60,7 +61,43 @@ class MiniApp(wx.Frame, App):
         
     def init_menu(self):
         self.menubar = MenuBar(self)
+
+    def init_menu(self):
+        self.menubar = RibbonBar(self)
+        self.auimgr.AddPane( self.menubar, aui.AuiPaneInfo() .CaptionVisible(False) .Top() .PinButton( True ).Dock().Resizable().FloatingSize( wx.DefaultSize ).Layer(5) )
         
+
+    def load_menu(self, data):
+        self.menubar.load(data, {})
+        
+    def init_canvas(self):
+        self.canvasnbwrap = wx.Panel(self)
+        sizer = wx.BoxSizer( wx.VERTICAL )
+        self.canvasnb = CanvasNoteBook(self.canvasnbwrap)
+
+        sizer.Add( self.canvasnb, 1, wx.EXPAND |wx.ALL, 0 )
+        self.canvasnbwrap.SetSizer( sizer )
+        self.canvasnbwrap.Layout()
+        self.auimgr.AddPane( self.canvasnbwrap, aui.AuiPaneInfo() .Center() .CaptionVisible( False ).PinButton( True ).Dock()
+            .PaneBorder( False ).Resizable().FloatingSize( wx.DefaultSize ). BottomDockable( True ).TopDockable( False )
+            .LeftDockable( True ).RightDockable( True ) )
+        self.canvasnb.Bind( wx.lib.agw.aui.EVT_AUINOTEBOOK_PAGE_CHANGED, self.on_active_img)
+        self.canvasnb.Bind( wx.lib.agw.aui.EVT_AUINOTEBOOK_PAGE_CLOSE, self.on_close_img)
+
+    def init_table(self):
+        self.tablenbwrap = wx.Panel(self)
+        sizer = wx.BoxSizer( wx.VERTICAL )
+        self.tablenb = GridNoteBook( self.tablenbwrap)
+        sizer.Add( self.tablenb, 1, wx.EXPAND |wx.ALL, 0 )
+        self.tablenbwrap.SetSizer( sizer )
+        self.tablenbwrap.Layout()
+        
+        self.auimgr.AddPane( self.tablenbwrap, aui.AuiPaneInfo() .Bottom() .CaptionVisible( True ).PinButton( True ).Dock().Hide()
+            .MaximizeButton( True ).Resizable().FloatingSize((800, 600)).BestSize(( 120,120 )). Caption('Table') . 
+            BottomDockable( True ).TopDockable( False ).LeftDockable( True ).RightDockable( True ) )
+        self.tablenb.Bind( wx.lib.agw.aui.EVT_AUINOTEBOOK_PAGE_CHANGED, self.on_active_table)
+        self.tablenb.Bind( wx.lib.agw.aui.EVT_AUINOTEBOOK_PAGE_CLOSE, self.on_close_table)
+
     def init_tool(self):
         sizer = wx.BoxSizer(wx.VERTICAL)
         self.toolbar = ToolBar(self, False)
@@ -96,19 +133,25 @@ class MiniApp(wx.Frame, App):
         self.add_img(self.canvasnb.canvas().image)
         self.add_img_win(self.canvasnb.canvas())
 
+    def on_active_img(self, event):
+        self.active_img(self.canvasnb.canvas().image.name)
+        #self.add_img_win(self.canvasnb.canvas())
+
     def on_close_img(self, event):
         canvas = event.GetEventObject().GetPage(event.GetSelection())
-        self.remove_img_win(canvas)
-        self.remove_img(canvas.image)
+        #self.remove_img_win(canvas)
+        App.close_img(self, canvas.image.title)
 
     def on_new_tab(self, event):
         self.add_tab(event.GetEventObject().grid.table)
         self.add_tab_win(event.GetEventObject().grid)
 
-    def on_close_tab(self, event):
-        self.remove_tab_win(event.GetEventObject().grid)
-        self.remove_tab(event.GetEventObject().grid.table)
-        event.Skip()
+    def on_active_table(self, event):
+        self.active_table(self.tablenb.grid().table.title)
+
+    def on_close_table(self, event):
+        grid = event.GetEventObject().GetPage(event.GetSelection())
+        App.close_table(self, grid.table.title)
         
     def on_new_mesh(self, event):
         self.add_mesh(event.GetEventObject().canvas.mesh)
@@ -119,7 +162,7 @@ class MiniApp(wx.Frame, App):
         self.remove_mesh_win(event.GetEventObject().canvas)
         event.Skip()
         
-    def set_info(self, value):
+    def info(self, value):
         wx.CallAfter(self.txt_info.SetLabel, value)
 
     def set_progress(self, value):
@@ -138,27 +181,23 @@ class MiniApp(wx.Frame, App):
 
     def _show_img(self, img, title=None):
         canvas = self.canvasnb.add_canvas()
-        self.remove_img(canvas.image)
-        self.remove_img_win(canvas)
-        if not title is None:
-            canvas.set_imgs(img)
-            canvas.image.name = title
-        else: canvas.set_img(img)
-        self.add_img(canvas.image)
-        self.add_img_win(canvas)
+        if not isinstance(img, Image): 
+            img = Image(img, title)
+        App.show_img(self, img, img.title)
+        canvas.set_img(img)
 
     def show_img(self, img, title=None):
         wx.CallAfter(self._show_img, img, title)
 
     def _show_table(self, tab, title):
-        cframe = GridFrame(self)
-        grid = cframe.grid
+        grid = self.tablenb.add_grid()
+        if not isinstance(tab, Table): 
+            tab = Table(tab, title)
+        App.show_table(self, tab, tab.title)
         grid.set_data(tab)
-        if not title is None:
-            grid.table.name = title
-        cframe.Bind(wx.EVT_ACTIVATE, self.on_new_tab)
-        cframe.Bind(wx.EVT_CLOSE, self.on_close_tab)
-        cframe.Show()
+        info = self.auimgr.GetPane(self.tablenbwrap)
+        info.Show(True)
+        self.auimgr.Update()
 
     def show_table(self, tab, title=None):
         wx.CallAfter(self._show_table, tab, title)
@@ -235,7 +274,7 @@ class MiniApp(wx.Frame, App):
         self.auimgr.Update()
 
     def close_img(self, name=None):
-        names = self.get_img_name() if name is None else [name]
+        names = self.img_names() if name is None else [name]
         for name in names:
             idx = self.canvasnb.GetPageIndex(self.get_img_win(name))
             self.remove_img(self.get_img_win(name).image)
@@ -255,8 +294,7 @@ class MiniApp(wx.Frame, App):
         def one(cmds, after): 
             cmd = cmds.pop(0)
             title, para = cmd.split('>')
-            print(title, para)
-            plg = Source.manager('plugin').get(name=title)()
+            plg = self.app.plugin_manager.get(name=title)()
             after = lambda cmds=cmds: one(cmds, one)
             if len(cmds)==0: after = callafter
             wx.CallAfter(plg.start, self, eval(para), after)
@@ -296,7 +334,7 @@ class MiniApp(wx.Frame, App):
         dic = {wx.ID_YES:'yes', wx.ID_NO:'no', wx.ID_CANCEL:'cancel'}
         return dic[rst]
 
-    def getpath(self, title, filt, io, name=''):
+    def get_path(self, title, filt, io, name=''):
         filt = '|'.join(['%s files (*.%s)|*.%s'%(i.upper(),i,i) for i in filt])
         dic = {'open':wx.FD_OPEN, 'save':wx.FD_SAVE}
         dialog = wx.FileDialog(self, title, '', name, filt, dic[io])
@@ -305,12 +343,15 @@ class MiniApp(wx.Frame, App):
         dialog.Destroy()
         return path
 
-    def show_para(self, title, view, para, on_handle=None, on_ok=None, on_cancel=None, preview=False, modal=True):
+    def show_para(self, title, para, view, on_handle=None, on_ok=None, 
+        on_cancel=None, on_help=None, preview=False, modal=True):
+        on_help = lambda x=None:self.show_md(x or 'No Document!', title)
         dialog = ParaDialog(self, title)
         dialog.init_view(view, para, preview, modal=modal, app=self)
         dialog.Bind('cancel', on_cancel)
         dialog.Bind('parameter', on_handle)
         dialog.Bind('commit', on_ok)
+        dialog.Bind('help', on_help)
         return dialog.show()
 
 if __name__ == '__main__':
@@ -321,12 +362,17 @@ if __name__ == '__main__':
     frame = MiniApp(None)
     frame.Show()
     frame.show_img([np.zeros((512, 512), dtype=np.uint8)], 'zeros')
-    #frame.show_img(None)
     frame.show_table(pd.DataFrame(np.arange(100).reshape((10,10))), 'title')
+
+    plgs = ('root', [('file', [('IO', [('Open', OpenFile), ('Save', SaveImage)]), ('Gaussian', Gaussian)])])
+
+    frame.load_menu(plgs)
+
     '''
     frame.show_md('abcdefg', 'md')
     frame.show_md('ddddddd', 'md')
     frame.show_txt('abcdefg', 'txt')
     frame.show_txt('ddddddd', 'txt')
     '''
+
     app.MainLoop()

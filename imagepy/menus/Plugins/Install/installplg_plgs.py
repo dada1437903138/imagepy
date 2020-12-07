@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
 from imagepy import root_dir
-from imagepy.core.engine import Free
+from sciapp.action import Free
 import os, subprocess, zipfile, shutil
 
 import zipfile, sys, urllib
 path = 'https://github.com/Image-Py/imagepy/archive/master.zip'
 
 from urllib.request import urlretrieve
+import urllib
 from io import BytesIO as StringIO
 
 path_plgs = os.path.join(root_dir, 'plugins')
@@ -24,9 +25,13 @@ def Schedule(a,b,c, plg):
 
 class Install(Free):
     title = 'Install Plugins'
-    para = {'repo':'https://github.com/Image-Py/IBook'}
+    para = {'repo':'https://github.com/Image-Py/IBook', 'proxy': False, 'Protocol': 'https', 'IP': '127.0.0.1', 'Port': '1080'}
     view = [('lab', None, 'input a zipfile url or github url as http://github.com/username/project'),
-            (str, 'repo', 'package', '')]
+            (str, 'repo', 'package', ''),
+            (bool, 'proxy', 'Use proxy'),
+            (list, 'Protocol', ['socks5', 'http', 'https'], str, 'Protocol', ''),
+            (str, 'IP', 'IP Address', ''),
+            (str, 'Port', 'Port', '')]
 
     def run(self, para=None):
         url = para['repo']
@@ -40,7 +45,18 @@ class Install(Free):
             domain, name = (url[:-4].replace('.','-')).split('/')[-2:]
         domain, name = domain.replace('_', '-'), name.replace('_', '-')
 
-        self.app.set_info('downloading plugin from %s'%para['repo'])
+        self.app.info('downloading plugin from %s'%para['repo'])
+
+        if True == para['proxy']:
+            proxy=para['Protocol']+"://"+para['IP']+":"+para['Port']
+            print("proxy = ", proxy)
+            # Build ProxyHandler object by given proxy
+            proxy_support=urllib.request.ProxyHandler({para['Protocol']:proxy})
+            # Build opener with ProxyHandler object
+            opener = urllib.request.build_opener(proxy_support)
+            # Install opener to request
+            urllib.request.install_opener(opener)
+
         urlretrieve(url, os.path.join(path_cache, domain+'_'+name+'.zip'), 
             lambda a,b,c, p=self: Schedule(a,b,c,p))
         zipf = zipfile.ZipFile(os.path.join(path_cache, domain+'_'+name+'.zip'))
@@ -50,7 +66,7 @@ class Install(Free):
         if os.path.exists(destpath): shutil.rmtree(destpath)
         os.rename(os.path.join(path_cache, folder), destpath)
         zipf.close()
-        self.app.set_info('installing requirement liberies')
+        self.app.info('installing requirement liberies')
         self.prgs = None
         cmds = [sys.executable, '-m', 'pip', 'install', '-r', '%s/requirements.txt'%destpath]
         subprocess.call(cmds)

@@ -1,5 +1,5 @@
-from imagepy.core.engine import Simple, Free
-from sciapp import Source
+from sciapp.action import Simple, Free
+from imagepy.app import ConfigManager
 from sciapp.object import Shape
 from sciapp.util import mark2shp
 import json
@@ -22,7 +22,7 @@ class Save(Simple):
         return True
 
     def show(self):
-        self.para['path'] = self.app.getpath('Save..', ['mrk'], 'save')
+        self.para['path'] = self.app.get_path('Save..', ['mrk'], 'save')
         return not self.para['path'] is None
 
     def run(self, ips, imgs, para = None):
@@ -35,7 +35,7 @@ class Open(Simple):
     para = {'path':''}
 
     def show(self):
-        self.para['path'] = self.app.getpath('Open..', ['mrk'], 'open')
+        self.para['path'] = self.app.get_path('Open..', ['mrk'], 'open')
         return not self.para['path'] is None
 
     def run(self, ips, imgs, para = None):
@@ -54,6 +54,6 @@ class Setting(Free):
 
     def run(self, para=None):
         for i in para: Shape.default[i] = para[i]
-        Source.manager('config').add('mark_style', para)
+        ConfigManager.set('mark_style', para)
 
 plgs = [Open, Save, Clear, '-', Setting]

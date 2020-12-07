@@ -1,6 +1,6 @@
 import wx
 #from imagepy.core.manager import RoiManager, ImageManager
-from imagepy.core.engine import Macros
+from sciapp.action import Macros
 from sciapp.object import ROI, mark2shp
 #from imagepy import IPy
 
@@ -32,9 +32,9 @@ class Plugin(wx.Panel):
 	title = 'ROI Ctrl Panel'
 	single = None
 	
-	def __init__( self, parent ):
+	def __init__( self, parent, app=None):
 		wx.Panel.__init__ ( self, parent, id = wx.ID_ANY, pos = wx.DefaultPosition, size = wx.Size(-1,-1), style = wx.TAB_TRAVERSAL )
-		self.app = parent
+		self.app = app
 		sizer = wx.BoxSizer( wx.HORIZONTAL )
 		
 		self.note_book = wx.Notebook( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.NB_LEFT|wx.NB_TOP )

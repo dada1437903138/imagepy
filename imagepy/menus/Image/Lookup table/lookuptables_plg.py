@@ -6,8 +6,8 @@ Created on Mon Oct 17 21:13:42 2016
 from imagepy import root_dir
 import numpy as np
 #from imagepy.core import ImagePlus
-from imagepy.core.engine import Free
-from sciapp import Source
+from sciapp.action import Free
+from imagepy.app import ColorManager
 from sciapp.object import Image
 
 class LUT(Free):
@@ -28,5 +28,5 @@ class LUT(Free):
     
     def __call__(self): return self
           
-plgs = [LUT(i, j) for i, j, _ in Source.manager('colormap').gets(tag='base')]
+plgs = [LUT(i, j) for i, j, _ in ColorManager.gets(tag='base')]
     

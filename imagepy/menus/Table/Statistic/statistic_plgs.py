@@ -1,4 +1,4 @@
-from imagepy.core.engine import Table
+from sciapp.action import Table
 import pandas as pd
 
 class Statistic(Table):
@@ -41,7 +41,7 @@ class GroupStatistic(Table):
 		
 	view = [('fields', 'cn', 'field to statistic'),
 			('field', 'major', 'group by', 'major'),
-			('field', 'minor', 'group by', 'key'),
+			('field', 'minor', 'group by', 'minor'),
 			
 			(bool, 'sum', 'sum'),
 			(bool, 'mean', 'mean'),

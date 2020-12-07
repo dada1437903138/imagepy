@@ -4,7 +4,7 @@ Created on Wed Dec  7 23:03:28 2016
 @author: yxl
 """
 
-from imagepy.core.engine import Simple
+from sciapp.action import Simple
 import scipy.ndimage as ndimg
 import numpy as np
 
@@ -24,7 +24,7 @@ class Plugin(Simple):
         size = np.round([ips.slices*kz, ips.shape[1]*kx, ips.shape[0]*ky])
         n, w, h = size.astype(np.uint16)
 
-        buf = np.zeros((n, w, h, ips.channels), dtype=ips.dtype)
+        buf = np.zeros((n, h, w, ips.channels), dtype=ips.dtype)
         if kz==1:
             for i in range(ips.slices):
                 img = imgs[i].reshape(ips.shape+(-1,))

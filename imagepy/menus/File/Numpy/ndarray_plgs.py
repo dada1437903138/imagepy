@@ -1,29 +1,28 @@
-from imagepy.core.util import fileio
+from sciapp.action import dataio
 import numpy as np
-from sciapp import Source
 import os
 
-Source.manager('reader').add('npy', np.load, 'img')
-Source.manager('writer').add('npy', np.save, 'img')
-Source.manager('reader').add('npy', np.load, 'imgs')
-Source.manager('writer').add('npy', np.save, 'imgs')
+dataio.ReaderManager.add('npy', np.load, 'img')
+dataio.WriterManager.add('npy', np.save, 'img')
+dataio.ReaderManager.add('npy', np.load, 'imgs')
+dataio.WriterManager.add('npy', np.save, 'imgs')
 
-class OpenFile(fileio.Reader):
+class OpenFile(dataio.Reader):
 	title = 'Numpy Open'
 	tag = 'img'
 	filt = ['npy']
 
-class SaveFile(fileio.ImageWriter):
+class SaveFile(dataio.ImageWriter):
 	title = 'Numpy Save'
 	tag = 'img'
 	filt = ['npy']
 
-class Open3D(fileio.Reader):
+class Open3D(dataio.Reader):
 	title = 'Numpy 3D Open'
 	tag = 'imgs'
 	filt = ['npy']
 
-class Save3D(fileio.ImageWriter):
+class Save3D(dataio.ImageWriter):
 	title = 'Numpy 3D Save'
 	tag = 'imgs'
 	filt = ['npy']

@@ -1,6 +1,5 @@
 import wx, numpy as np
-from .boxutil import cross, multiply, merge, lay, mat, like
-from .imutil import mix_img
+from sciapp.util.imgutil import mix_img, cross, multiply, merge, lay, mat, like
 from .mark import drawmark
 from sciapp.object import Image, Shape, mark2shp, Layer, json2shp
 from sciapp.action import ImageTool, ShapeTool
@@ -104,6 +103,7 @@ class Canvas (wx.Panel):
         box = [1e10, 1e10, -1e10, -1e10]
         for i in self.images: box = merge(box, i.box)
         shapes = [i for i in self.marks.values() if isinstance(i, Shape)]
+        shapes = [i for i in shapes if not i.box is None]
         for i in shapes: box = merge(box, i.box)
         if box[2]<=box[0]: box[0], box[2] = box[0]-1e-3, box[2]+1e-3
         if box[1]<=box[3]: box[1], box[3] = box[1]-1e-3, box[3]+1e-3
@@ -131,10 +131,9 @@ class Canvas (wx.Panel):
             buf = memoryview(self.outrgb)
             self.outbmp = wx.Bitmap.FromBuffer(*shp[::-1], buf)
         if not back is None:
-            mix_img(back.img, m, o, shp, self.outbak, 
+            mix_img(back.imgs[img.cur], m, o, shp, self.outbak, 
                 self.outrgb, self.outint, back.rg, back.lut,
                 back.log, cns=back.cn, mode='set')
-        
         mix_img(img.img, m, o, shp, self.outimg,
             self.outrgb, self.outint, img.rg, img.lut,
             img.log, cns=img.cn, mode=img.mode)
@@ -171,8 +170,7 @@ class Canvas (wx.Panel):
             print('frame rate:',int(50/max(0.001,counter[1])))
             counter[0] = counter[1] = 0
 
-    def set_tool(self, tool):
-        self.tool = tool
+    def set_tool(self, tool): self.tool = tool
 
     @property
     def scale(self):

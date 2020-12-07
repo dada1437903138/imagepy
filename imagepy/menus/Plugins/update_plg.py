@@ -1,7 +1,8 @@
-from imagepy.core.engine import Free
+from sciapp.action import Free
 import os, sys, os.path as osp
 import zipfile, urllib
 from io import BytesIO
+from imagepy import root_dir
 import shutil
 
 if sys.version_info[0]==2:
@@ -19,11 +20,11 @@ class Update(Free):
     title = 'Update Software'
 
     def run(self, para=None):
-        IPy.set_info('update now, waiting...')
+        self.app.info('update now, waiting...')
         self.download_zip()
         self.deal_file()
         #self.delete_cache()
-        IPy.alert('imagepy update done!')
+        self.app.alert('imagepy update done!')
 
     def download_zip(self):
         url='https://github.com/Image-Py/imagepy/archive/master.zip'
@@ -53,6 +54,6 @@ class Refresh(Free):
     title = 'Reload Plugins'
 
     def run(self, para=None):
-        IPy.reload_plgs(True, True, True, True)
+        self.app.load_all()
 
 plgs = [Update, Refresh]

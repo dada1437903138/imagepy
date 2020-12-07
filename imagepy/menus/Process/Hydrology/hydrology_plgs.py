@@ -1,6 +1,6 @@
 import scipy.ndimage as ndimg
 import numpy as np
-from imagepy.core.engine import Filter
+from sciapp.action import Filter
 from imagepy.ipyalg import find_maximum, ridge, stair, isoline, watershed
 # from imagepy.core.roi import PointRoi
 from sciapp.object import Points, ROI
@@ -58,7 +58,7 @@ class FindMin(Filter):
         ips.update()
 
 class UPRidge(Filter):
-    title = 'Find Riedge'
+    title = 'Find Ridge'
     note = ['8-bit', 'not_slice', 'auto_snap', 'not_channel', 'preview']
     
     para = {'sigma':1.0, 'thr':0, 'ud':True, 'type':'white line'}

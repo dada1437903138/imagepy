@@ -1,6 +1,7 @@
-from imagepy.core.engine import Simple, Free
-from sciapp import Source
-from sciapp.object import ROI, geom2shp, geom_flatten, Rectangle, geom_union, mark2shp
+from sciapp.action import Simple, Free
+from sciapp.object import ROI, Rectangle
+from sciapp.util.shputil import geom2shp, geom_flatten, geom_union, mark2shp
+from imagepy.app import ConfigManager
 import json, time
 
 class SelectAll(Simple):
@@ -121,7 +122,7 @@ class Save(Simple):
     para={'path':''}
 
     def show(self):
-        self.para['path'] = self.app.getpath('ROI Save', ['roi'], 'save')
+        self.para['path'] = self.app.get_path('ROI Save', ['roi'], 'save')
         return not self.para['path'] is None
 
     def run(self, ips, imgs, para = None):
@@ -134,7 +135,7 @@ class Open(Simple):
     para={'path':''}
 
     def show(self):
-        self.para['path'] = self.app.getpath('ROI Save', ['roi'], 'open')
+        self.para['path'] = self.app.get_path('ROI Save', ['roi'], 'open')
         return not self.para['path'] is None
 
     def run(self, ips, imgs, para = None):
@@ -230,7 +231,7 @@ class Setting(Free):
 
     def run(self, para=None):
         for i in para: ROI.default[i] = para[i]
-        Source.manager('config').add('roi_style', para)
+        ConfigManager.set('roi_style', para)
 
 plgs = [SelectAll, SelectNone, 
         '-', Inflate, Shrink, Convex, Box, Clip, Invert, 

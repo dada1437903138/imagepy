@@ -1,6 +1,6 @@
-# from imagepy.ui.widgets import CMapSelCtrl
-# from imagepy.core.manager import ColorManager, ImageManager, WindowsManager, ToolsManager
-from imagepy.core.engine import Macros
+from sciwx.widgets import CMapSelCtrl
+from imagepy.app import ColorManager
+from sciapp.action import Macros
 import numpy as np
 import wx, os.path as osp
 
@@ -12,11 +12,12 @@ def make_bitmap(bmp):
 # apply, paint, fill, width, slic
 class Plugin ( wx.Panel ):
 	title = 'Label Tool'
-	def __init__( self, parent ):
+	def __init__( self, parent, app=None):
 		wx.Panel.__init__ ( self, parent, id = wx.ID_ANY, pos = wx.DefaultPosition, size = wx.Size(-1,-1), style = wx.TAB_TRAVERSAL )
 		outsizer = wx.BoxSizer(wx.HORIZONTAL)
 		sizer = wx.BoxSizer( wx.VERTICAL )
 		sizer_color = wx.BoxSizer( wx.HORIZONTAL )
+		self.app = app
 		self.btns = []
 		self.btn_make =  wx.Button( self, wx.ID_ANY, 'New Mark', wx.DefaultPosition, wx.DefaultSize, 0 )
 		sizer_color.Add(self.btn_make, 0, wx.ALL, 2)
@@ -37,7 +38,7 @@ class Plugin ( wx.Panel ):
 		sizer_other.Add( self.btn_update, 0, wx.ALL, 2)
 
 		self.cmapsel = CMapSelCtrl(self)
-		self.cmapsel.SetItems(ColorManager.luts)
+		self.cmapsel.SetItems(ColorManager.gets(tag='base'))
 		sizer_other.Add(self.cmapsel, 0, wx.ALL|wx.EXPAND, 2 )
 
 		com_backChoices = [ u"No Background" ]
@@ -89,23 +90,23 @@ class Plugin ( wx.Panel ):
 		self.btn_make.Bind( wx.EVT_BUTTON, self.on_make)
 
 	def on_make(self, event):
-		Macros(None, ['Build Mark Image>None']).start()
+		Macros(None, ['Build Mark Image>None']).start(self.app)
 
 	def on_fill(self, event):
-		tol = ToolsManager.get('Flood Fill')()
+		tol = self.app.get_plugin('Flood Fill')()
 		tol.para['tor'] = 0
-		tol.start()
+		tol.start(self.app)
 
 	def on_pen(self, width):
-		tol = ToolsManager.get('Pencil')()
+		tol = self.app.get_plugin('Pencil')()
 		tol.para['width'] = width
-		tol.start()
+		tol.start(self.app)
 
 	def on_color(self, event):
-		ColorManager.set_front(self.btns.index(event.GetEventObject()))
+		self.app.manager('color').add('front', self.btns.index(event.GetEventObject()))
 
 	def on_items(self, event):
-		items = ['No Background Image']+ImageManager.get_titles()
+		items = ['No Background Image']+self.app.img_names()
 		self.com_back.SetItems(items)
 		if self.com_back.GetValue() in items:
 			self.com_back.Select(items.index(self.com_back.GetValue()))
@@ -113,14 +114,14 @@ class Plugin ( wx.Panel ):
 
 	def on_cmapsel(self, event):
 		key = self.cmapsel.GetValue()
-		lut = ColorManager.get_lut(key)
+		lut = ColorManager.get(key)
 		n = self.spn_num.GetValue()+1
 		idx = np.linspace(0, 255, n).astype(int)
-		cs = list(lut[idx]) + [(128,128,128)]*(16-n)
-		for btn, c in zip(self.btns, cs):
+		self.cs = list(lut[idx]) + [(128,128,128)]*(16-n)
+		for btn, c in zip(self.btns, self.cs):
 			btn.SetBackgroundColour(c)
 
-		ips = ImageManager.get()
+		ips = self.app.get_img()
 		if ips is None: return
 		newlut = lut*0
 		newlut[:n] = lut[idx]
@@ -130,19 +131,19 @@ class Plugin ( wx.Panel ):
 	def on_setback(self, event):
 		name = self.com_back.GetValue()
 		if name is None: return
-		ImageManager.get().back = ImageManager.get(name)
+		self.app.get_img().back = self.app.get_img(name)
 		#curwin = WindowsManager.get()
 		#curwin.set_back(ImageManager.get(name))
-		ImageManager.get().update()
+		self.app.get_img().update()
 
 	def on_mode(self, event):
-		ips = ImageManager.get()
+		ips = self.app.get_img()
 		if ips is None: return
 		if self.chk_hide.GetValue():  
-			ips.chan_mode = 0.0
+			ips.mode = 0.0
 			return ips.update()
 		modes = ['set', 'max', 'min', 'msk', 0.2, 0.4, 0.5, 0.6, 0.8]
-		ips.chan_mode = modes[self.com_mode.GetSelection()]
+		ips.mode = modes[self.com_mode.GetSelection()]
 		ips.update()
 
 	def __del__( self ):

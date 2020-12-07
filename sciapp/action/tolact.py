@@ -12,8 +12,9 @@ class Tool(SciAction):
     def mouse_up(self, canvas, x, y, btn, **key): pass
     def mouse_move(self, canvas, x, y, btn, **key): pass
     def mouse_wheel(self, canvas, x, y, d, **key): pass
-    def start(self, app): 
+    def start(self, app, para=None, callafter=None): 
         self.app, self.default = app, self
+        if para == 'local': return self
         if not app is None: app.tool = self
 
 class DefaultTool(Tool):
@@ -29,7 +30,7 @@ class DefaultTool(Tool):
         self.oldxy = None
     
     def mouse_move(self, obj, x, y, btn, **key):
-        if self.oldxy is None: return
+        if not hasattr(self, 'oldxy') or self.oldxy is None: return
         ox, oy = self.oldxy
         up = (1,-1)[key['canvas'].up]
         key['canvas'].move(key['px']-ox, (key['py']-oy)*up)
@@ -39,47 +40,55 @@ class DefaultTool(Tool):
         if d>0: key['canvas'].zoomout(x, y, coord='data')
         if d<0: key['canvas'].zoomin(x, y, coord='data')
 
-    def start(self, app): 
+    def start(self, app, para=None): 
         self.app = app
+        if para == 'local': return self
         Tool.default = self
-        if not app is None: app.tool = self
+        #if not app is None: app.tool = self
 
 class ImageTool(DefaultTool):
     default = None
     title = 'Image Tool'
 
     def mouse_move(self, img, x, y, btn, **key):
+        DefaultTool.mouse_move(self, img, x, y, btn, **key)
         if self.app is None: return
         r, c = int(y), int(x)
         if (r>0) & (c>0) & (r<img.shape[0]) & (c<img.shape[1]):
             s = 'x:%d y:%d  value:%s'%(x, y, img.img[r,c])
-            self.app.set_info(s)
+            self.app.info(s)
 
-    def start(self, app): 
+    def start(self, app, para=None, callafter=None): 
         self.app = app
+        if para == 'local': return self
         ImageTool.default = self
-        if not app is None: app.tool = self
+        #if not app is None: app.tool = self
 
 class ShapeTool(DefaultTool):
     default = None
     title = 'Shape Tool'
 
     def mouse_move(self, img, x, y, btn, **key):
-        if self.app: self.app.set_info('%d, %d'%(x, y))
+        if self.app: self.app.info('%d, %d'%(x, y))
 
-    def start(self, app): 
+    def start(self, app, para=None, callafter=None): 
         self.app = app
+        if para == 'local': return self
         ShapeTool.default = self
-        if not app is None: app.tool = self
+        # if not app is None: app.tool = self
 
 class TableTool(DefaultTool):
     default = None
     title = 'Table Tool'
 
-    def start(self, app): 
+    def mouse_down(self, data, x, y, btn, **others):
+        print('you click on cell', x, y)
+
+    def start(self, app, para=None, callafter=None): 
         self.app = app
+        if para == 'local': return self
         TableTool.default = self
-        if not app is None: app.tool = self
+        # if not app is None: app.tool = self
 
 DefaultTool().start(None)
 ImageTool().start(None)

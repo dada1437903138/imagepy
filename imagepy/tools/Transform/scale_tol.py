@@ -1,5 +1,5 @@
 import numpy as np
-from imagepy.core.engine import Filter
+from sciapp.action import Filter
 from sciapp.action import ImageTool
 from sciapp.util import mark2shp, geom2shp
 from shapely.affinity import affine_transform
@@ -102,8 +102,7 @@ class Plugin(Filter):
         
         self.make_mark()
         ips.update()
-        win = self.app.get_img_win()
-        win.canvas.tool = ScaleTool(self)
+        ips.tool = ScaleTool(self).start(self.app, 'local')
         return True
         
     def count(self, dir=True):
@@ -119,17 +118,13 @@ class Plugin(Filter):
             self.tp = self.para['oy']+self.orih*self.para['ky']/2
 
     def ok(self, ips, para=None):
+        ips.mark = ips.tool = None
         Filter.ok(self, ips, para)
-        win = self.app.get_img_win()
-        win.canvas.tool = None
-        ips.mark = None
         
     def cancel(self, ips):
         Filter.cancel(self, ips)
         ips.roi = self.bufroi
-        win = self.app.get_img_win()
-        win.canvas.tool = None
-        ips.mark = None
+        ips.mark = ips.tool = None
         
     def preview(self, ips, para):
         Filter.preview(self, ips, para)

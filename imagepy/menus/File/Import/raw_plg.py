@@ -2,7 +2,7 @@ import os,sys
 import numpy as np
 import io# urllib2 urllib.request, urllib.error, urllib.parse
 from skimage.io import imread
-from imagepy.core.engine import Free
+from sciapp.action import Free
 
 class Plugin(Free):
     title = 'Open Raw'
@@ -15,8 +15,8 @@ class Plugin(Free):
             (list, 'c', [1,3], int, 'channel', '')]
     
     def load(self):
-        filt = ['raw']
-        self.para['path'] = self.app.getpath('Open..', filt, 'open', '')
+        filt = 'raw'
+        self.para['path'] = self.app.get_path('Open..', filt, 'open', '')
         return not self.para['path'] is None
 
     #process

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*
 import scipy.ndimage as ndimg
-from imagepy.core.engine import Filter, Simple
+from sciapp.action import Filter, Simple
 #from skimage.morphology import watershed
 from imagepy.ipyalg import watershed
 import numpy as np
@@ -85,7 +85,6 @@ class UPWatershed(Filter):
 		ips.update()
 
 	def run(self, ips, snap, img, para = None):
-		print('hahahaha')
 		imgs = ips.imgs
 		gradient = np.zeros(imgs.shape, dtype=np.float32)
 		gradient += ndimg.sobel(imgs, axis=0, output=np.float32)**2

@@ -353,23 +353,12 @@ def json2shp(obj):
 
 def geom2shp(obj): return json2shp(geom.mapping(obj))
 
-def geom_flatten(obj, geoms=None):
-    geoms, root = ([], True) if geoms is None else (geoms, False)
-    if isinstance(obj, geom.GeometryCollection):
-        for i in obj: geom_flatten(i, geoms)
-    elif type(obj) in {geom.MultiPolygon, geom.MultiPoint, geom.MultiLineString}: 
-        geoms.extend(list(obj))
-    else: geoms.append(obj)
-    if root: return geom.GeometryCollection(geoms)
-
-def geom_union(obj):
-    return geom_flatten(unary_union(geom_flatten(obj)))
-
 if __name__ == '__main__':
     import json
 
-    mark = {'type': 'layer', 'body': [{'type': 'circle', 'body': (256, 256, 5)}, {'type': 'cirlce', 'body': (256, 256, 50)}, {'type': 'circle', 'body': (306.0, 256.0, 3)}]}
-    a = mark2shp(mark)
+    layer = {'type': 'layer', 'body': [{'type': 'circle', 'body': (256, 256, 5)}, {'type': 'circle', 'body': (256, 256, 50)}, {'type': 'circle', 'body': (306.0, 256.0, 3)}]}
+    layers = {'type':'layers', 'body':{1:{'type':'layer', 'body':[]}}}
+    a = mark2shp(layers)
     print(a)
     #import geonumpy.io as gio
     #shp = gio.read_shp('C:/Users/54631/Documents/projects/huangqu/demo/shape/province.shp')

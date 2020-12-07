@@ -5,7 +5,7 @@ Created on Mon Dec 26 20:34:59 2016
 """
 from imagepy import root_dir
 import wx, numpy as np, os
-from imagepy.core.engine import Filter,Simple
+from sciapp.action import Filter,Simple
 from pubsub import pub
 import pandas as pd
 
@@ -80,14 +80,13 @@ class Histogram(Simple):
             hist = np.histogram(img, np.arange(257))[0]
         show_hist(self.app, ips.title+'-Histogram', hist)
 
-
 class Frequence(Simple):
     title = 'Frequence'
     note = ['8-bit', '16-bit']
     
     para = {'fre':True, 'slice':False}
     view = [(bool, 'fre', 'count frequence'),
-            (bool, 'slice', 'each slices')]
+            (bool, 'slice', 'slice')]
         
     def run(self, ips, imgs, para = None):
         if not para['slice']: imgs = [ips.img]
@@ -119,8 +118,8 @@ class Statistic(Simple):
     view = [(bool, 'max', 'max'),
             (bool, 'min', 'min'),
             (bool, 'mean', 'mean'),
-            (bool, 'variance', 'var'),
-            (bool, 'standard', 'std'),
+            (bool, 'var', 'variance'),
+            (bool, 'std', 'standard'),
             (bool, 'slice', 'slice')]
         
     def count(self, img, para):
@@ -176,7 +175,7 @@ class PointsValue(Simple):
             (bool, 'slice', 'slice')]
         
     def load(self, ips):
-        if ips.roi.roitype != 'point':
+        if ips.roi.roitype != 'point' and ips.roi.roitype != 'points':
             return self.app.alert('a PointRoi needed!')
         return True
     

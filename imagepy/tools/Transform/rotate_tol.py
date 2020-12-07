@@ -3,12 +3,12 @@ import numpy as np
 from sciapp.action import ImageTool
 from sciapp.util import mark2shp, geom2shp
 from sciapp.object import ROI
-from imagepy.core.engine import Filter
+from sciapp.action import Filter
 from shapely.affinity import affine_transform
 import scipy.ndimage as nimg
 
 class RotateTool(ImageTool):
-    """RotateTool class derived from imagepy.core.engine.Tool"""
+    """RotateTool class derived from sciapp.action.Tool"""
     def __init__(self, plg):
         self.plg = plg
         self.para = plg.para
@@ -45,7 +45,7 @@ class RotateTool(ImageTool):
             ips.update()
 
 class Plugin(Filter):
-    """RotateTool class plugin derived from imagepy.core.engine.Filter"""
+    """RotateTool class plugin derived from sciapp.action.Filter"""
     modal = False
     title = 'Rotate'
     note = ['all', 'auto_msk', 'auto_snap', 'preview']
@@ -66,22 +66,17 @@ class Plugin(Filter):
                 self.para['ox'] = int((box[0]+box[2])/2)
         self.make_mark()
         ips.update()
-        win = self.app.get_img_win()
-        win.canvas.tool = RotateTool(self)
+        ips.tool = RotateTool(self).start(self.app, 'local')
         return True
         
     def cancel(self, ips):
         Filter.cancel(self, ips)
         ips.roi = self.bufroi
-        win = self.app.get_img_win()
-        ips.mark = None
-        win.canvas.tool = None
+        ips.mark = ips.tool = None
         
     def ok(self, ips, para=None):
+        ips.mark = ips.tool = None
         Filter.ok(self, ips, para)
-        win = self.app.get_img_win()
-        ips.mark = None
-        win.canvas.tool = None
         
     def draw(self, dc, f, **key):
         dc.SetPen(wx.Pen((0,255,0), width=1, style=wx.SOLID))

@@ -10,33 +10,38 @@ New Tool::新建Tool
 
 Macros::宏
 
-Macros Recorder::录制宏
+Macros Recorder::宏录制器
 
 Run Macros::运行宏
 
 Manager::管理
 
 Plugins Manager::插件管理
-    Search::搜索
-    Name::名称
-    Author::作者
-    Version::版本
-    Status::状态
-    installed::已安装
-    only installed::只显示已安装
-    Install::安装
-    Update::更新
-    Remove::移除
-    
+	Search::搜索
+	Name::名称
+	Author::作者
+	Version::版本
+	Status::状态
+	installed::已安装
+	only installed::只显示已安装
+	Install::安装
+	Update::更新
+	Remove::移除
+
 Plugin Tree View::插件树浏览
+	Plugin Information::插件信息
+	[SourceCode]::[查看源码]
 
 Tool Tree View::工具树浏览
+	Tool Information::插件信息
+	[SourceCode]::[查看源码]
 
 Plugin List View::插件列表
+	Search::搜索
 
-Shortcut Editor::编辑快捷键
+Shortcut Editor::快捷键编辑器
 
-Command Line::打开命令行
+Command Line::命令行
 
 Install::安装
 
@@ -45,6 +50,12 @@ Install Packages::安装包
 List Packages::包列表
 
 Install Plugins::安装插件
+	input a zipfile url or github url as http://github.com/username/project::输入一个zip文件链接或github链接，例如http://github.com/username/project
+	package::链接
+	Use proxy::使用代理
+	Protocol::协议类型
+	IP Address::IP地址
+	Port::端口号
 
 List Plugins::插件列表
 
@@ -79,4 +90,3 @@ Stroke Step::笔迹
 Game Of Life::生命游戏
 
 Screen Capture::截屏
-

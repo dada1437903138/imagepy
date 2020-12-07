@@ -4,10 +4,9 @@ Created on Sat Oct 15 14:42:55 2016
 @author: yxl
 """
 
-from imagepy.core.util import fileio
+from sciapp.action import dataio
 from skimage.io import imread
-from sciapp import Source
-from imagepy.core.engine import Free
+from sciapp.action import Free
 from glob import glob
 import os.path as osp
     
@@ -16,12 +15,12 @@ class Plugin(Free):
     para = {'path':'', 'start':0, 'end':0, 'step':1, 'title':'sequence'}
 
     def load(self):
-        self.filt = Source.manager('reader').names()
+        self.filt = dataio.ReaderManager.names()
         return True
 
     def show(self):
         filt = '|'.join(['%s files (*.%s)|*.%s'%(i.upper(),i,i) for i in self.filt])
-        rst = self.app.getpath('Import sequence', self.filt, 'open')
+        rst = self.app.get_path('Import sequence', self.filt, 'open')
         if rst is None: return rst
         self.para['path'] = rst
         files = self.getfiles(self.para['path'])
@@ -31,7 +30,7 @@ class Plugin(Free):
                      (int, 'start', (0, nfs-1), 0, 'Start', '0~{}'.format(nfs-1)),
                      (int, 'end',   (0, nfs-1), 0, 'End', '0~{}'.format(nfs-1)),
                      (int, 'step',  (0, nfs-1), 0, 'Step', '')]
-        return self.app.show_para('Import sequence', self.view, self.para)
+        return self.app.show_para('Import sequence', self.para, self.view)
 
     def getfiles(self, name):
         p,f = osp.split(name)
@@ -53,7 +52,7 @@ class Plugin(Free):
     def run(self, para = None):
         fp, fn = osp.split(para['path'])
         fn, fe = osp.splitext(fn)
-        read = Source.manager('reader').get(name=fe[1:])
+        read = dataio.ReaderManager.get(name=fe[1:])
         try: img = read(para['path'])
         except: return self.app.alert('unknown img format!')
         files = self.getfiles(para['path'])

@@ -53,13 +53,15 @@ class Image:
         self.msk = None
         self.pos = (0,0)
         self.cn = 0
-        self.rg = (0,255)
+        self.rg = [(0,255)]
         self.lut = default_lut
         self.log = False
         self.mode = 'set'
         self.dirty = False
         self.snap = None
         self.back = None
+        self.tool = None
+        self.data = {}
 
     @property
     def box(self):
@@ -139,8 +141,8 @@ class Image:
     def update(self): self.dirty = True
 
     def reset(self):
-        self.cn = [0, (0,1,2)][self.channels==3]
-        if self.dtype == np.uint8:
+        self.cn = [0, [0,1,2]][self.channels==3]
+        if self.dtype == np.uint8: 
             self.rg = [(0, 255)] * self.channels
         else: 
             self.rg = self.get_updown('all', 'all', step=512)

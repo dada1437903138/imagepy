@@ -4,12 +4,12 @@ Created on Tue Dec 27 01:06:59 2016
 @author: yxl
 """
 import numpy as np
-from imagepy.core.engine import Simple, Filter
+from sciapp.action import Simple, Filter
 from scipy.ndimage import label, generate_binary_structure
 from skimage.measure import regionprops
 from sciapp.object import mark2shp
 import pandas as pd
-from sciapp import Source
+from imagepy.app import ColorManager
 
 # center, area, l, extent, cov
 class RegionCounter(Simple):
@@ -195,6 +195,6 @@ class PropertyMarker(Filter):
         else: ps = ps / ps.max()
         idx[1:] = ps * 245 + 10
         img[:] = idx[lab]
-        ips.lut = Source.manager('colormap').get(para['cm'])
+        ips.lut = ColorManager.get(para['cm'])
 
 plgs = [RegionCounter, RegionFilter, PropertyMarker]

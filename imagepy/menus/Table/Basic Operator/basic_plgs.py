@@ -1,4 +1,4 @@
-from imagepy.core.engine import Table
+from sciapp.action import Table
 
 class Transpose(Table):
 	title = 'Table Transpose'
@@ -6,8 +6,8 @@ class Transpose(Table):
 	def run(self, tps, snap, data, para = None):
 		tps.data = data.T
 
-class Corp(Table):
-	title = 'Table Corp'
+class Crop(Table):
+	title = 'Table Crop'
 	note = ['req_sel']
 	def run(self, tps, snap, data, para):
 		tps.data = tps.subtab()
@@ -57,4 +57,4 @@ class AddCol(Table):
 	def run(self, tps, snap, data, para = None):
 		data[para['name']] = para['value']
 
-plgs = [Transpose, Duplicate, Corp, '-', DeleteRow, DeleteCol, AppendRow, AddCol]
+plgs = [Transpose, Duplicate, Crop, '-', DeleteRow, DeleteCol, AppendRow, AddCol]

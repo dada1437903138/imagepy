@@ -1,5 +1,5 @@
 import numpy as np
-from imagepy.core.engine import Simple, Filter
+from sciapp.action import Simple, Filter
 from scipy.ndimage import label, generate_binary_structure
 from skimage.measure import marching_cubes_lewiner, mesh_surface_area
 from skimage.segmentation import find_boundaries
@@ -82,7 +82,7 @@ class RegionCounter(Simple):
             ites = np.array([i.inertia_tensor_eigvals for i in ls])
             rst = np.sqrt(np.clip(ites.sum(axis=1)//2-ites.T, 0, 1e10)) * 4
             for i in rst[::-1]: dt.append(np.abs(i))
-        IPy.show_table(pd.DataFrame(list(zip(*dt)), columns=titles), ips.title+'-region')
+        self.app.show_table(pd.DataFrame(list(zip(*dt)), columns=titles), ips.title+'-region')
 
 # center, area, l, extent, cov
 class RegionFilter(Simple):

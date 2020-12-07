@@ -3,7 +3,7 @@ import wx, numpy as np
 from sciapp import Source
 
 class Histogram( wx.Panel ):
-	title = 'Histogram'
+	title = 'Histogram Widget'
 
 	def __init__( self, parent, app):
 		wx.Panel.__init__ ( self, parent, id = wx.ID_ANY, pos = wx.DefaultPosition, size = wx.Size( 255,0 ), style = wx.TAB_TRAVERSAL )
@@ -53,8 +53,7 @@ class Histogram( wx.Panel ):
 		bSizer1.Add( bSizer2, 0, wx.EXPAND |wx.ALL, 5 )
 
 		self.cmapsel = CMapSelCtrl(self)
-
-		self.cmapsel.SetItems(Source.manager('colormap').gets())
+		
 		bSizer1.Add(self.cmapsel, 0, wx.ALL|wx.EXPAND, 5 )
 
 		self.cmap = CMapPanel(self)
@@ -130,7 +129,7 @@ class Histogram( wx.Panel ):
 	def on_minmax( self, event ):
 		ips = self.app.get_img()
 		if ips is None: return
-		minv, maxv = ips.get_updown()
+		minv, maxv = ips.get_updown()[0]
 		self.range = ips.range = (minv, maxv)
 		hist = ips.histogram()
 		self.histpan.SetValue(hist)
